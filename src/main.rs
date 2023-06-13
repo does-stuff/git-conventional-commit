@@ -175,3 +175,4 @@ fn commit(args: Vec<String>, original_args: Args) {
 }
 
 // Example commit with all options
+// BREAKING CHANGE test
