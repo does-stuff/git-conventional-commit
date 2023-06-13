@@ -8,26 +8,29 @@ const SUGGESTED_TYPES: [&str; 10] = [
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short = 'm', long = "message")]
+    #[arg(short = 'm', long = "message", help = "Add a message")]
     message: String,
 
-    #[arg(short = 't', long = "type", value_parser = SUGGESTED_TYPES)]
+    #[arg(short = 't', long = "type", value_parser = SUGGESTED_TYPES, help = "Add a type")]
     message_type: String,
 
-    #[arg(short = 's', long = "scope")]
+    #[arg(short = 's', long = "scope", help = "Add a scope")]
     scope: Option<String>,
 
-    #[arg(short = 'b', long = "body")]
+    #[arg(short = 'b', long = "body", help = "Add a body (can be chained)")]
     body: Option<Vec<String>>,
 
-    #[arg(short = 'f', long = "footer")]
+    #[arg(short = 'f', long = "footer", help = "Add a footer")]
     footer: Option<String>,
 
-    #[arg(short = None, long = "breaking")]
+    #[arg(short = None, long = "breaking", help = "Is this a breaking change?")]
     breaking: Option<String>,
 
-    #[arg(short = 'a', long = "amend")]
-    amend: Option<bool>,
+    #[arg(short = 'a', long = "amend", help = "Amend the last commit")]
+    amend: bool,
+
+    #[arg(short = None, long = "all", help = "Commit all files")]
+    all: bool,
 }
 
 fn main() {
@@ -42,6 +45,14 @@ fn main() {
 
 fn handle_with_clap() {
     let cli_args = Args::parse();
+
+    if cli_args.all {
+        std::process::Command::new("git")
+            .arg("add")
+            .arg(".")
+            .spawn()
+            .expect("Failed to add all files");
+    }
 
     let scope = match cli_args.scope.clone() {
         Some(scope) => scope,
@@ -123,7 +134,8 @@ fn handle_with_user_input() {
             body: None,
             footer: None,
             breaking: None,
-            amend: None,
+            amend: false,
+            all: false,
         },
     );
 }
@@ -167,13 +179,9 @@ fn commit(args: Vec<String>, original_args: Args) {
     let mut command = std::process::Command::new("git");
     command.arg("commit").args(args);
 
-    if original_args.amend.is_some() {
+    if original_args.amend {
         command.arg("--amend");
     }
 
     command.spawn().expect("Failed to commit");
 }
-
-// Example commit with all options
-// BREAKING CHANGE test
-// Using user input test
