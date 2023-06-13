@@ -19,6 +19,12 @@ struct Args {
 
     #[arg(short = 'b', long = "body")]
     body: Option<Vec<String>>,
+
+    #[arg(short = 'f', long = "footer")]
+    footer: Option<String>,
+
+    #[arg(short = None, long = "breaking")]
+    breaking: Option<String>,
 }
 
 fn main() {
@@ -41,6 +47,28 @@ fn handle_with_clap() {
 
     let message = format_message(args.message_type, scope, args.message);
     println!("{}", message);
+
+    let body = match args.body {
+        Some(body) => body,
+        None => vec![],
+    };
+
+    let body: Vec<String> = body.iter().map(|s| format!("-m '{}'", s.trim())).collect();
+    let body = body.join(" ");
+
+    let footer = match args.footer {
+        Some(footer) => format!("-m '{}'", footer),
+        None => "".to_owned(),
+    };
+
+    let breaking = match args.breaking {
+        Some(breaking) => format!("-m 'BREAKING CHANGE: {}'", breaking),
+        None => "".to_owned(),
+    };
+
+    let args = vec![message, body, breaking, footer];
+
+    commit(args);
 }
 
 fn handle_with_user_input() {
@@ -112,10 +140,12 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
 }
 
 fn commit(args: Vec<String>) {
-    let args = args.join(" ");
-    std::process::Command::new("git")
-        .arg("commit")
-        .arg(args)
-        .spawn()
-        .expect("Failed to commit");
+    let mut command = std::process::Command::new("git");
+    command.arg("commit");
+
+    for arg in args {
+        command.arg(arg);
+    }
+
+    command.spawn().expect("Failed to commit");
 }
