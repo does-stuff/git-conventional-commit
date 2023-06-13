@@ -11,7 +11,7 @@ struct Args {
     #[arg(short = 'm', long = "message")]
     message: String,
 
-    #[arg(short = 't', long = "type")]
+    #[arg(short = 't', long = "type", value_parser = SUGGESTED_TYPES)]
     message_type: String,
 
     #[arg(short = 's', long = "scope")]
@@ -61,8 +61,21 @@ fn handle_with_user_input() {
         .map(|s| format!("-m '{}'", s.trim()))
         .collect();
 
+    let footer = get_user_input("What is the footer of this commit? (Optional)", false);
+
+    let breaking = get_user_input("Is this a breaking change? (y/N)", false);
+    let breaking = match breaking.to_lowercase().as_str() {
+        "y" => {
+            let change = get_user_input("What is the breaking change?", true);
+            format!("-m 'BREAKING CHANGE: {}'", change)
+        }
+        _ => "".to_owned(),
+    };
+
     let mut args = vec![message];
     args.extend(body);
+    args.push(breaking);
+    args.push(format!("-m '{}'", footer));
 
     println!("{:#?}", args);
 
@@ -100,10 +113,9 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
 
 fn commit(args: Vec<String>) {
     let args = args.join(" ");
-    println!("git commit {}", args);
-    // std::process::Command::new("git")
-    //     .arg("commit")
-    //     .arg(args.join(" "))
-    //     .spawn()
-    //     .expect("Failed to commit");
+    std::process::Command::new("git")
+        .arg("commit")
+        .arg(args)
+        .spawn()
+        .expect("Failed to commit");
 }
