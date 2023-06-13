@@ -47,7 +47,9 @@ fn handle_with_user_input() {
     let scope = get_user_input("What is the scope of this commit? (Optional)", false);
 
     let message = format_message(message_type, scope, message);
-    println!("{}", message);
+
+    let args = vec![message];
+    println!("{:#?}", args);
 }
 
 fn get_user_input(prompt: &str, required: bool) -> String {
@@ -71,7 +73,12 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
         false => format!("({})", scope).to_string(),
     };
 
-    return format!("-m '{}{}: {}'", message_type, scope, message);
+    return format!(
+        "-m '{}{}: {}'",
+        message_type.replace("'", "\""),
+        scope.replace("'", "\""),
+        message.replace("'", "\"")
+    );
 }
 
 fn commit(args: Vec<String>) {
