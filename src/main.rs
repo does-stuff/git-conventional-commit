@@ -68,7 +68,7 @@ fn handle_with_clap() {
     };
 
     let breaking = match cli_args.breaking.clone() {
-        Some(breaking) => format!("-m 'BREAKING CHANGE: {}'", breaking),
+        Some(breaking) => format!("-m BREAKING CHANGE: {}", breaking),
         None => "".to_owned(),
     };
 
@@ -166,3 +166,5 @@ fn commit(args: Vec<String>, original_args: Args) {
 
     command.spawn().expect("Failed to commit");
 }
+
+// Example commit with all options
