@@ -52,6 +52,7 @@ fn handle_with_clap() {
         cli_args.message_type.clone(),
         scope,
         cli_args.message.clone(),
+        cli_args.breaking.clone().unwrap_or("".to_owned()),
     );
 
     let body = match cli_args.body.clone() {
@@ -84,8 +85,6 @@ fn handle_with_user_input() {
     let message = get_user_input("What is the commit message?", true);
     let scope = get_user_input("What is the scope of this commit? (Optional)", false);
 
-    let message = format_message(message_type, scope, message);
-
     let body = get_user_input(
         "What is the body of this commit? (// = new paragraph) (Optional)",
         false,
@@ -106,6 +105,8 @@ fn handle_with_user_input() {
         }
         _ => "".to_owned(),
     };
+
+    let message = format_message(message_type, scope, message, breaking.clone());
 
     let mut args = vec![message];
     args.extend(body);
@@ -142,16 +143,22 @@ fn get_user_input(prompt: &str, required: bool) -> String {
     return input.trim().to_owned();
 }
 
-fn format_message(message_type: String, scope: String, message: String) -> String {
+fn format_message(
+    message_type: String,
+    scope: String,
+    message: String,
+    breaking: String,
+) -> String {
     let scope = match scope.trim().is_empty() {
         true => "".to_owned(),
         false => format!("({})", scope).to_string(),
     };
 
     return format!(
-        "-m {}{}: {}",
+        "-m {}{}{}: {}",
         message_type.replace("'", "\""),
         scope.replace("'", "\""),
+        if breaking.len() > 0 { "!" } else { "" },
         message.replace("'", "\"")
     );
 }
