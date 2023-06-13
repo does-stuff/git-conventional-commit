@@ -2,24 +2,44 @@
 
 A wrapper around `git commit` that makes use of the [Conventional Commits](https://www.conventionalcommits.org) spec.
 
-## The Idea
+## How It Works
 
-```sh
-# `gc` acts as an alias to this script in this example
-# `--body` can be chained to add multiple paragraphs
-gc --type "feat" --scope "kitty" --description "Added background opacity" --body "Insert body here..." --breaking "This somehow completely ruins the configuration or something"
+### Method 1: Command Line Arguments
 
-# ... or
-gc -t "feat" -s "kitty" -d "Added background opacity" -b "Insert body here..." --breaking "This somehow completely ruins the configuration or something"
+One method to using this is by using command line args on their own. There are multiple available:
 
-# feat(kitty)!: Added background opacity
-#
-# Insert body here...
-#
-# BREAKING CHANGE: This somehow completely ruins the configuration or something
-```
+- `-m`, `--message` - Add a message to the commit [REQUIRED]
+- `-t`, `--type` - Add a type to the commit (fix, feat, etc.) [REQUIRED]
+- `-s`, `--scope` - Add a scope to the commit
+- `-b`, `--body` - Add a body to the commit (can be chained)
+- `-f`, `--footer` - Add a footer to the commit
+- `-a`, `--amend` - Amend the previous commit
+- `--breaking` - Indicate a breaking change
+- `--all` - `git add .` automatically
 
 I would also like to add zsh autocomplete functionality, so things like `--type` can get autocompleted.
+
+#### Example:
+```bash
+/path/to/git-conventional-commit -m "This is a commit" -t "fix" -s "some_scope"
+# git commit -m "fix(some_scope): This is a commit"
+```
+
+### Method 2: Interactive
+
+This method will just have you type `/path/to/git-conventional-commit`.
+
+The script will then walk you through creating a new commit:
+
+```
+What type of commit is this?: fix
+What is the commit message?: This is a commit
+What is the scope of this commit? (Optional): some_scope
+What is the body of this commit? (// = new paragraph) (Optional): A body // Some content
+Do you want to commit all files? (y/N): y
+What is the footer of this commit? (Optional): Some footer here
+Is this a breaking change? (y/N): n
+```
 
 # Why Rust?
 
