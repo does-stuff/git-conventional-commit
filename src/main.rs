@@ -16,6 +16,9 @@ struct Args {
 
     #[arg(short = 's', long = "scope")]
     scope: Option<String>,
+
+    #[arg(short = 'b', long = "body")]
+    body: Option<Vec<String>>,
 }
 
 fn main() {
@@ -48,8 +51,22 @@ fn handle_with_user_input() {
 
     let message = format_message(message_type, scope, message);
 
-    let args = vec![message];
+    let body = get_user_input(
+        "What is the body of this commit? (// = new paragraph) (Optional)",
+        false,
+    );
+
+    let body: Vec<String> = body
+        .split("//")
+        .map(|s| format!("-m '{}'", s.trim()))
+        .collect();
+
+    let mut args = vec![message];
+    args.extend(body);
+
     println!("{:#?}", args);
+
+    commit(args);
 }
 
 fn get_user_input(prompt: &str, required: bool) -> String {
@@ -82,9 +99,11 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
 }
 
 fn commit(args: Vec<String>) {
-    std::process::Command::new("git")
-        .arg("commit")
-        .arg(args.join(" "))
-        .spawn()
-        .expect("Failed to commit");
+    let args = args.join(" ");
+    println!("git commit {}", args);
+    // std::process::Command::new("git")
+    //     .arg("commit")
+    //     .arg(args.join(" "))
+    //     .spawn()
+    //     .expect("Failed to commit");
 }
