@@ -32,7 +32,7 @@ fn handle_with_clap() {
     let args = Args::parse();
 
     let scope = match args.scope {
-        Some(scope) => format!("({})", scope).to_string(),
+        Some(scope) => scope,
         None => "".to_owned(),
     };
 
@@ -71,7 +71,7 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
         false => format!("({})", scope).to_string(),
     };
 
-    return format!("{}{}: {}", message_type, scope, message);
+    return format!("-m '{}{}: {}'", message_type, scope, message);
 }
 
 fn commit(args: Vec<String>) {
