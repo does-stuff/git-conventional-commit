@@ -47,11 +47,7 @@ fn handle_with_clap() {
     let cli_args = Args::parse();
 
     if cli_args.all {
-        std::process::Command::new("git")
-            .arg("add")
-            .arg(".")
-            .spawn()
-            .expect("Failed to add all files");
+        add_all();
     }
 
     let scope = match cli_args.scope.clone() {
@@ -106,6 +102,15 @@ fn handle_with_user_input() {
         .map(|s| format!("-m {}", s.trim()))
         .collect();
 
+    let all = get_user_input("Do you want to commit all files? (y/N)", false);
+    let all = match all.to_lowercase().as_str() {
+        "y" => {
+            add_all();
+            true
+        }
+        _ => false,
+    };
+
     let footer = get_user_input("What is the footer of this commit? (Optional)", false);
 
     let breaking = get_user_input("Is this a breaking change? (y/N)", false);
@@ -135,7 +140,7 @@ fn handle_with_user_input() {
             footer: None,
             breaking: None,
             amend: false,
-            all: false,
+            all,
         },
     );
 }
@@ -173,6 +178,14 @@ fn format_message(
         if breaking.len() > 0 { "!" } else { "" },
         message.replace("'", "\"")
     );
+}
+
+fn add_all() {
+    std::process::Command::new("git")
+        .arg("add")
+        .arg(".")
+        .spawn()
+        .expect("Failed to add all files");
 }
 
 fn commit(args: Vec<String>, original_args: Args) {
