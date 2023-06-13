@@ -25,6 +25,9 @@ struct Args {
 
     #[arg(short = None, long = "breaking")]
     breaking: Option<String>,
+
+    #[arg(short = 'a', long = "amend")]
+    amend: Option<bool>,
 }
 
 fn main() {
@@ -38,37 +41,41 @@ fn main() {
 }
 
 fn handle_with_clap() {
-    let args = Args::parse();
+    let cli_args = Args::parse();
 
-    let scope = match args.scope {
+    let scope = match cli_args.scope.clone() {
         Some(scope) => scope,
         None => "".to_owned(),
     };
 
-    let message = format_message(args.message_type, scope, args.message);
-    println!("{}", message);
+    let message = format_message(
+        cli_args.message_type.clone(),
+        scope,
+        cli_args.message.clone(),
+    );
 
-    let body = match args.body {
+    let body = match cli_args.body.clone() {
         Some(body) => body,
         None => vec![],
     };
 
-    let body: Vec<String> = body.iter().map(|s| format!("-m '{}'", s.trim())).collect();
+    let body: Vec<String> = body.iter().map(|s| format!("-m {}", s.trim())).collect();
     let body = body.join(" ");
 
-    let footer = match args.footer {
-        Some(footer) => format!("-m '{}'", footer),
+    let footer = match cli_args.footer.clone() {
+        Some(footer) => format!("-m {}", footer),
         None => "".to_owned(),
     };
 
-    let breaking = match args.breaking {
+    let breaking = match cli_args.breaking.clone() {
         Some(breaking) => format!("-m 'BREAKING CHANGE: {}'", breaking),
         None => "".to_owned(),
     };
 
-    let args = vec![message, body, breaking, footer];
+    let mut args = vec![message, body, breaking, footer];
+    args.retain(|x| !x.is_empty());
 
-    commit(args);
+    commit(args, cli_args);
 }
 
 fn handle_with_user_input() {
@@ -86,7 +93,7 @@ fn handle_with_user_input() {
 
     let body: Vec<String> = body
         .split("//")
-        .map(|s| format!("-m '{}'", s.trim()))
+        .map(|s| format!("-m {}", s.trim()))
         .collect();
 
     let footer = get_user_input("What is the footer of this commit? (Optional)", false);
@@ -103,11 +110,21 @@ fn handle_with_user_input() {
     let mut args = vec![message];
     args.extend(body);
     args.push(breaking);
-    args.push(format!("-m '{}'", footer));
+    args.push(format!("-m {}", footer));
+    args.retain(|x| !x.is_empty());
 
-    println!("{:#?}", args);
-
-    commit(args);
+    commit(
+        args,
+        Args {
+            message: "".to_owned(),
+            message_type: "".to_owned(),
+            scope: None,
+            body: None,
+            footer: None,
+            breaking: None,
+            amend: None,
+        },
+    );
 }
 
 fn get_user_input(prompt: &str, required: bool) -> String {
@@ -132,19 +149,19 @@ fn format_message(message_type: String, scope: String, message: String) -> Strin
     };
 
     return format!(
-        "-m '{}{}: {}'",
+        "-m {}{}: {}",
         message_type.replace("'", "\""),
         scope.replace("'", "\""),
         message.replace("'", "\"")
     );
 }
 
-fn commit(args: Vec<String>) {
+fn commit(args: Vec<String>, original_args: Args) {
     let mut command = std::process::Command::new("git");
-    command.arg("commit");
+    command.arg("commit").args(args);
 
-    for arg in args {
-        command.arg(arg);
+    if original_args.amend.is_some() {
+        command.arg("--amend");
     }
 
     command.spawn().expect("Failed to commit");
