@@ -55,11 +55,16 @@ fn handle_with_clap() {
         None => "".to_owned(),
     };
 
+    let breaking = match cli_args.breaking.clone() {
+        Some(breaking) => breaking,
+        None => "".to_owned(),
+    };
+
     let message = format_message(
         cli_args.message_type.clone(),
         scope,
         cli_args.message.clone(),
-        cli_args.breaking.clone().unwrap_or("".to_owned()),
+        breaking,
     );
 
     let body = match cli_args.body.clone() {
@@ -104,7 +109,7 @@ fn handle_with_user_input() {
 
     let all = get_user_input("Do you want to commit all files? (y/N)", false);
     let all = match all.to_lowercase().as_str() {
-        "y" => {
+        "y" | "yes" => {
             add_all();
             true
         }
@@ -115,7 +120,7 @@ fn handle_with_user_input() {
 
     let breaking = get_user_input("Is this a breaking change? (y/N)", false);
     let breaking = match breaking.to_lowercase().as_str() {
-        "y" => {
+        "y" | "yes" => {
             let change = get_user_input("What is the breaking change?", true);
             format!("-m 'BREAKING CHANGE: {}'", change)
         }
@@ -133,8 +138,8 @@ fn handle_with_user_input() {
     commit(
         args,
         Args {
-            message: "".to_owned(),
-            message_type: "".to_owned(),
+            message: String::new(),
+            message_type: String::new(),
             scope: None,
             body: None,
             footer: None,
