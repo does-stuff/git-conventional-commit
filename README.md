@@ -2,6 +2,10 @@
 
 A wrapper around `git commit` that makes use of the [Conventional Commits](https://www.conventionalcommits.org) spec.
 
+Created simply for some Rust fun.
+
+---
+
 ## How It Works
 
 ### Method 1: Command Line Arguments
