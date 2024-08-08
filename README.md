@@ -10,8 +10,6 @@ Created simply for some Rust fun.
 
 ### Method 1: Command Line Arguments
 
-One method to using this is by using command line args on their own. There are multiple available:
-
 - `-m`, `--message` - Add a message to the commit [REQUIRED]
 - `-t`, `--type` - Add a type to the commit (fix, feat, etc.) [REQUIRED]
 - `-s`, `--scope` - Add a scope to the commit
@@ -20,14 +18,6 @@ One method to using this is by using command line args on their own. There are m
 - `-a`, `--amend` - Amend the previous commit
 - `--breaking` - Indicate a breaking change
 - `--all` - `git add .` automatically
-
-I would also like to add zsh autocomplete functionality, so things like `--type` can get autocompleted.
-
-#### Example:
-```bash
-/path/to/git-conventional-commit -m "This is a commit" -t "fix" -s "some_scope"
-# git commit -m "fix(some_scope): This is a commit"
-```
 
 ### Method 2: Interactive
 
@@ -45,7 +35,14 @@ What is the footer of this commit? (Optional): Some footer here
 Is this a breaking change? (y/N): n
 ```
 
-# Why Rust?
+### Example
+
+```bash
+/path/to/git-conventional-commit -m "This is a commit" -t "fix" -s "some_scope"
+# git commit -m "fix(some_scope): This is a commit"
+```
+
+## Why Rust?
 
 Because this script is 🔥🔥🔥🔥BLAZINGLY FAST!!!!!!!!!🔥🔥🔥🔥
 
